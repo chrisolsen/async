@@ -5,9 +5,7 @@ import "sync"
 //	doneChan := make(chan bool)
 //  errChan := make(chan error)
 //
-//  go func() {
-//  	async.New(op1, op2).Do(doneChan, errChan)
-//  }()
+//  async.New(op1, op2).Run(doneChan, errChan)
 //
 //  for {
 //  	select {
@@ -35,12 +33,11 @@ func New(fns ...Op) *Ops {
 	return &aops
 }
 
-// Do executes the operation list. This function should be called on within a go routine
-func (a *Ops) Do(doneChan chan bool, errChan chan error) {
-	var wg sync.WaitGroup
-	wg.Add(len(a.ops))
-
+// Run executes the operation list within a go routine
+func (a *Ops) Run(doneChan chan bool, errChan chan error) {
 	go func() {
+		var wg sync.WaitGroup
+		wg.Add(len(a.ops))
 		for _, op := range a.ops {
 			go func(op Op) {
 				if err := op(); err != nil {
@@ -50,8 +47,7 @@ func (a *Ops) Do(doneChan chan bool, errChan chan error) {
 				wg.Done()
 			}(op)
 		}
+		wg.Wait()
+		doneChan <- true
 	}()
-
-	wg.Wait()
-	doneChan <- true
 }

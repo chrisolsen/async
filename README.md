@@ -26,10 +26,6 @@ func main() {
 		return nil
 	}
 
-	last := func() {
-		fmt.Println(a, b)
-	}
-
     var wg sync.WaitGroup
 	doneChan := make(chan bool)
 	errChan := make(chan error)
@@ -62,7 +58,7 @@ func main() {
 		case err := <-errChan:
             // handle error
 		case <-doneChan:
-			last()
+			fmt.Println(a, b)
 			return
 		}
 	}
@@ -93,24 +89,17 @@ func main() {
 		return nil
 	}
 
-	last := func() {
-		fmt.Println(a, b)
-	}
-
 	doneChan := make(chan bool)
 	errChan := make(chan error)
 
-	go func() {
-		async.New(op1, op2).Do(doneChan, errChan)
-	}()
+	async.New(op1, op2).Run(doneChan, errChan)
 
 	for {
 		select {
 		case err := <-errChan:
 			fmt.Println("Error", err.Error())
 		case <-doneChan:
-			last()
-			fmt.Println("DONE")
+			fmt.Println(a, b)
 			return
 		}
 	}
