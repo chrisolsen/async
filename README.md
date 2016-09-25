@@ -10,7 +10,7 @@ package main
 import (
 	"fmt"
 
-	"bitbucket.org/chrisolsen/test/async"
+	"bitbucket.org/chrisolsen/async"
 )
 
 func main() {
@@ -73,7 +73,7 @@ package main
 import (
 	"fmt"
 
-	"bitbucket.org/chrisolsen/test/async"
+	"bitbucket.org/chrisolsen/async"
 )
 
 func main() {
