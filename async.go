@@ -33,6 +33,11 @@ func New(fns ...Op) *Ops {
 	return &aops
 }
 
+// Add operation to be run
+func (a *Ops) Add(fn Op) {
+	a.ops = append(a.ops, fn)
+}
+
 // Run executes the operation list within a go routine
 func (a *Ops) Run(doneChan chan bool, errChan chan error) {
 	go func() {

@@ -2,8 +2,46 @@ package async
 
 import (
 	"errors"
+	"sync/atomic"
 	"testing"
 )
+
+func Test_RunCount(t *testing.T) {
+
+	var count uint64
+
+	op1 := func() error {
+		atomic.AddUint64(&count, 1)
+		return nil
+	}
+
+	op2 := func() error {
+		atomic.AddUint64(&count, 2)
+		return nil
+	}
+
+	op3 := func() error {
+		atomic.AddUint64(&count, 4)
+		return nil
+	}
+
+	doneChan := make(chan bool)
+	errChan := make(chan error)
+
+	q := New(op1, op2)
+	q.Add(op3)
+	q.Run(doneChan, errChan)
+
+	for {
+		select {
+		case <-doneChan:
+			if count != 7 {
+				t.Error("All three channels didn't run properly. count = ", count)
+			}
+			return
+		}
+	}
+}
 
 func Test_Run(t *testing.T) {
 	var a, b int
