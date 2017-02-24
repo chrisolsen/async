@@ -38,20 +38,20 @@ func (a *Ops) Add(fn func() error) {
 }
 
 // Run executes the operation list within a go routine
-func (a *Ops) Run(doneChan chan bool, errChan chan error) {
+func (a *Ops) Run(ch chan error) {
 	go func() {
 		var wg sync.WaitGroup
 		wg.Add(len(a.ops))
 		for _, op := range a.ops {
 			go func(op func() error) {
 				if err := op(); err != nil {
-					errChan <- err
+					ch <- err
 					return
 				}
 				wg.Done()
 			}(op)
 		}
 		wg.Wait()
-		doneChan <- true
+		ch <- nil
 	}()
 }

@@ -25,16 +25,14 @@ func Test_RunCount(t *testing.T) {
 		return nil
 	}
 
-	doneChan := make(chan bool)
-	errChan := make(chan error)
-
+	ch := make(chan error)
 	q := New(op1, op2)
 	q.Add(op3)
-	q.Run(doneChan, errChan)
+	q.Run(ch)
 
 	for {
 		select {
-		case <-doneChan:
+		case <-ch:
 			if count != 7 {
 				t.Error("All three channels didn't run properly. count = ", count)
 			}
@@ -56,19 +54,15 @@ func Test_Run(t *testing.T) {
 		return nil
 	}
 
-	doneChan := make(chan bool)
-	errChan := make(chan error)
-
-	New(op1, op2).Run(doneChan, errChan)
+	ch := make(chan error)
+	New(op1, op2).Run(ch)
 
 	for {
 		select {
-		case err := <-errChan:
+		case err := <-ch:
 			if err != nil {
 				t.Error("no error expected")
 			}
-			return
-		case <-doneChan:
 			if a != 13 {
 				t.Error("'a' value is not 13, but is", a)
 			}
@@ -92,16 +86,16 @@ func Test_RunWithError(t *testing.T) {
 		return errors.New("OMG FAIL")
 	}
 
-	doneChan := make(chan bool)
-	errChan := make(chan error)
-
-	New(op1, op2).Run(doneChan, errChan)
+	ch := make(chan error)
+	New(op1, op2).Run(ch)
 
 LOOP:
 	for {
 		select {
-		case err = <-errChan:
-			break LOOP
+		case err = <-ch:
+			if err != nil {
+				break LOOP
+			}
 		}
 	}
 
