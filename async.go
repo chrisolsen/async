@@ -1,6 +1,14 @@
 package async
 
-import "sync"
+import (
+	"errors"
+	"sync"
+	"time"
+)
+
+var (
+	ErrTimeout = errors.New("operation timeout")
+)
 
 //	doneChan := make(chan bool)
 //  errChan := make(chan error)
@@ -53,5 +61,22 @@ func (a *Ops) Run(ch chan error) {
 		}
 		wg.Wait()
 		ch <- nil
+	}()
+}
+
+func (a *Ops) RunWithTimeout(ch chan error, d time.Duration) {
+	tch := make(chan error)
+	a.Run(tch)
+	go func() {
+		for {
+			select {
+			case err := <-tch:
+				ch <- err
+				return
+			case <-time.Tick(d):
+				ch <- ErrTimeout
+				return
+			}
+		}
 	}()
 }

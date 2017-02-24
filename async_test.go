@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sync/atomic"
 	"testing"
+	"time"
 )
 
 func Test_RunCount(t *testing.T) {
@@ -101,5 +102,29 @@ LOOP:
 
 	if err == nil {
 		t.Error("error expected")
+	}
+}
+
+func TestRunWithTimeout(t *testing.T) {
+	var err error
+	longOp := func() error {
+		time.Sleep(10 * time.Second)
+		return nil
+	}
+	ch := make(chan error)
+	New(longOp).RunWithTimeout(ch, time.Millisecond*100)
+
+LOOP:
+	for {
+		select {
+		case err = <-ch:
+			break LOOP
+		case <-time.Tick(time.Second):
+			break LOOP
+		}
+	}
+
+	if err != ErrTimeout {
+		t.Error("timeout error expected")
 	}
 }
