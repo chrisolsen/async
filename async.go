@@ -17,16 +17,15 @@ import "sync"
 //  	}
 //  }
 
-// Op performs one of the async operations
-type Op func() error
+// // Op performs one of the async operations
+// type Op func() error
 
-// Ops collection of async operations that needs to be performed
 type Ops struct {
-	ops []Op
+	ops []func() error
 }
 
 // New accepts a list of operations to be run
-func New(fns ...Op) *Ops {
+func New(fns ...func() error) *Ops {
 	aops := Ops{}
 	aops.ops = fns
 
@@ -34,7 +33,7 @@ func New(fns ...Op) *Ops {
 }
 
 // Add operation to be run
-func (a *Ops) Add(fn Op) {
+func (a *Ops) Add(fn func() error) {
 	a.ops = append(a.ops, fn)
 }
 
@@ -44,7 +43,7 @@ func (a *Ops) Run(doneChan chan bool, errChan chan error) {
 		var wg sync.WaitGroup
 		wg.Add(len(a.ops))
 		for _, op := range a.ops {
-			go func(op Op) {
+			go func(op func() error) {
 				if err := op(); err != nil {
 					errChan <- err
 					return
