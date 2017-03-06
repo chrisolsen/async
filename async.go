@@ -6,28 +6,25 @@ import (
 	"time"
 )
 
+// Errors
 var (
 	ErrTimeout = errors.New("operation timeout")
 )
 
-//	doneChan := make(chan bool)
-//  errChan := make(chan error)
-//
-//  async.New(op1, op2).Run(doneChan, errChan)
+//  ch := make(chan error)
+//  async.New(op1, op2).Run(ch)
 //
 //  for {
 //  	select {
 //  	case err := <-errChan:
-//  		// handle error
-//  	case <-doneChan:
-// 			// peform final logic
-//  		return
+//  		if err != nil {
+//				// handle error and...abort?
+// 			}
+// 			// operations complete
 //  	}
 //  }
 
-// // Op performs one of the async operations
-// type Op func() error
-
+// Ops is a list of operations. You should not need to use this type.
 type Ops struct {
 	ops []func() error
 }
