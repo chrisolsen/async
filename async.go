@@ -61,6 +61,8 @@ func (a *Ops) Run(ch chan error) {
 	}()
 }
 
+// RunWithTimeout runs the operations and returns an ErrTimeout if the operations
+// are not completed before the specified timeout duration.
 func (a *Ops) RunWithTimeout(ch chan error, d time.Duration) {
 	tch := make(chan error)
 	a.Run(tch)
